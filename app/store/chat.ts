@@ -269,9 +269,20 @@ export const useChatStore = createPersistStore(
       async onUserInput(content: string) {
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
-
-        const userContent = fillTemplateWith(content, modelConfig);
+        let userContent;
+        // if (modelConfig.model == "gpt-4-vision-preview") {
+        //   userContent = [
+        //     {
+        //       "type": "image_url",
+        //       "image_url": {
+        //         "url": ""
+        //       }
+        //     }
+        //   ]
+        // } else {
+        userContent = fillTemplateWith(content, modelConfig);
         console.log("[User Input] after template: ", userContent);
+        // }
 
         const userMessage: ChatMessage = createMessage({
           role: "user",

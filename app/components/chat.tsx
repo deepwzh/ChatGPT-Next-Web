@@ -622,6 +622,9 @@ function _Chat() {
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [userInput, setUserInput] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
   const { submitKey, shouldSubmit } = useSubmitHandler();
   const { scrollRef, setAutoScroll, scrollDomToBottom } = useScrollToBottom();
@@ -711,6 +714,46 @@ function _Chat() {
     setPromptHints([]);
     if (!isMobileScreen) inputRef.current?.focus();
     setAutoScroll(true);
+  };
+
+  const handleDragOver = (event: any) => {
+    event.preventDefault();
+    setDragging(true);
+  };
+
+  const handleDragEnter = (event: any) => {
+    event.preventDefault();
+    setDragging(true);
+  };
+
+  const handleDragLeave = (event: any) => {
+    event.preventDefault();
+    setDragging(false);
+  };
+
+  const handleDrop = (event: any) => {
+    event.preventDefault();
+    setDragging(false);
+    const file = event.dataTransfer.files[0];
+    handleFileUpload(file);
+  };
+
+  const handleFileChange = (event: any) => {
+    const file = event.target.files[0];
+    handleFileUpload(file);
+  };
+
+  const handleFileUpload = async (file: any) => {
+    // 在这里处理上传文件的逻辑，例如读取文件内容或上传到服务器
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageDataUrl = reader.result;
+      if (imageDataUrl != null && typeof imageDataUrl == "string") {
+        setUserInput(userInput + "\n" + `![](${imageDataUrl})`);
+        // setUploadedImage(imageDataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const onPromptSelect = (prompt: RenderPompt) => {
@@ -1293,10 +1336,15 @@ function _Chat() {
             onClick={scrollToBottom}
             rows={inputRows}
             autoFocus={autoFocus}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
             style={{
               fontSize: config.fontSize,
             }}
           />
+          <input type="file" onChange={handleFileChange} accept="image/*" />
           <IconButton
             icon={<SendWhiteIcon />}
             text={Locale.Chat.Send}

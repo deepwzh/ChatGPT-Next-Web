@@ -65,11 +65,66 @@ export class ChatGPTApi implements LLMApi {
   extractMessage(res: any) {
     return res.choices?.at(0)?.message?.content ?? "";
   }
+  getContent(content: string) {
+    // ![山景图片](https://example.com/images/mountain.jpg)
+    // ![山景图片](https://example.com/images/mountain.jpg)
+    // ![山景图片](https://example.com/images/mountain.jpg)
+    const regex = /!\[.*?\]\(([^)]+)\)/g;
+    // const matches = content.match(regex);
+    // if (matches == null || matches.length <= 0) {
+    //   return content;
+    // } else {
+    //   let contents = [
 
+    //   ];
+    // }
+    let contents = [];
+    let matchStartIndex = 0;
+    let index = 0;
+    let match;
+
+    while ((match = regex.exec(content)) !== null) {
+      const matchText = match[0]; // 匹配到的整个结果
+      const matchIndex = match.index; // 匹配结果的起始索引位置
+
+      if (matchIndex > matchStartIndex) {
+        contents.push({
+          type: "text",
+          text: content.slice(matchStartIndex, matchIndex - 1),
+        });
+      }
+
+      matchStartIndex = matchIndex + matchText.length;
+
+      if (match.length > 1) {
+        contents.push({
+          type: "image_url",
+          image_url: {
+            url: match[1],
+          },
+        });
+      }
+
+      // console.log(`匹配到的结果：${matchText}`);
+      // console.log(`起始索引位置：${matchIndex}`);
+    }
+    if (matchStartIndex < content.length) {
+      contents.push({
+        type: "text",
+        text: content.slice(matchStartIndex, content.length - 1),
+      });
+    }
+
+    if (contents.length > 0) {
+      return contents;
+    }
+
+    return content;
+  }
   async chat(options: ChatOptions) {
     const messages = options.messages.map((v) => ({
       role: v.role,
-      content: v.content,
+      content: this.getContent(v.content),
     }));
 
     const modelConfig = {
@@ -88,6 +143,7 @@ export class ChatGPTApi implements LLMApi {
       presence_penalty: modelConfig.presence_penalty,
       frequency_penalty: modelConfig.frequency_penalty,
       top_p: modelConfig.top_p,
+      max_tokens: 4096,
       // max_tokens: Math.max(modelConfig.max_tokens, 1024),
       // Please do not ask me why not send max_tokens, no reason, this param is just shit, I dont want to explain anymore.
     };
