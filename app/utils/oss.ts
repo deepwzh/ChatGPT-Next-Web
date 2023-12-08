@@ -1,24 +1,50 @@
-import OSS from "ali-oss";
-import { randomBytes, randomUUID } from "crypto";
-import mitt from "next/dist/shared/lib/mitt";
+import AWS from "aws-sdk";
 import { getServerSideConfig } from "../config/server";
+
+class OSSClient {
+  client: AWS.S3;
+  bucket: string;
+  constructor(cfg: ReturnType<typeof getServerSideConfig>) {
+    this.bucket = cfg.oss_bucket_name || "";
+    this.client = new AWS.S3({
+      endpoint: cfg.oss_host,
+      region: cfg.oss_region,
+      accessKeyId: cfg.oss_access_key_id || "",
+      secretAccessKey: cfg.oss_access_key_secret || "",
+    });
+  }
+
+  uploadFile(path: string, file: File) {
+    return new Promise((resolve, reject) => {
+      const params: AWS.S3.PutObjectRequest = {
+        Bucket: this.bucket,
+        Key: path,
+        Body: file,
+      };
+
+      this.client.upload(
+        params,
+        function (err: Error, data: AWS.S3.ManagedUpload.SendData) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({ url: data.Location });
+          }
+        },
+      );
+    });
+  }
+}
 
 export function getOSSClient() {
   const cfg = getServerSideConfig();
-  console.log(cfg);
   if (
-    cfg.oss_access_key_id != undefined &&
-    cfg.oss_access_key_secret != undefined
+    cfg.oss_access_key_id !== undefined &&
+    cfg.oss_access_key_secret !== undefined &&
+    cfg.oss_bucket_name !== undefined
   ) {
-    const client = new OSS({
-      region: cfg.oss_region,
-      // 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM用户进行API访问或日常运维，请登录RAM控制台创建RAM用户。
-      accessKeyId: cfg.oss_access_key_id || "",
-      accessKeySecret: cfg.oss_access_key_secret || "",
-      bucket: cfg.oss_bucket_name,
-    });
+    const client = new OSSClient(cfg);
     return client;
-  } else {
-    return null;
   }
+  return null;
 }

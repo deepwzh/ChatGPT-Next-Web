@@ -90,6 +90,9 @@ import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
 import { getOSSClient } from "../utils/oss";
+import { random } from "nanoid";
+import { randomBytes, randomInt, randomUUID } from "crypto";
+import { integer } from "aws-sdk/clients/cloudfront";
 const client = getOSSClient();
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
@@ -746,6 +749,18 @@ function _Chat() {
     const file = event.target.files[0];
     handleFileUpload(file);
   };
+  const generateRandomString = (length: integer) => {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      result += characters.charAt(randomIndex);
+    }
+
+    return result;
+  };
 
   const handleFileUpload = async (file: any) => {
     if (client == null) {
@@ -755,10 +770,10 @@ function _Chat() {
     const reader = new FileReader();
     reader.onload = () => {
       const imageData = reader.result;
-      let filename = `pasted-image-${Date.now()}-${file.name}`;
+      let filename = `upload-image-${Date.now()}-${generateRandomString(20)}}`;
 
       client
-        .put(filename, file)
+        .uploadFile(filename, file)
         .then(function (res: any) {
           console.log(`upload file: ${res}`);
           setUserInput(userInput + "\n" + `![](${res.url})`);
@@ -785,14 +800,16 @@ function _Chat() {
         if (items[i].type.indexOf("image") !== -1) {
           const blob = items[i].getAsFile();
           if (blob != null) {
-            let filename = `pasted-image-${Date.now()}`;
+            let filename = `pasted-image-${Date.now()}-${generateRandomString(
+              20,
+            )}`;
             if (blob.type == "image/png") {
               filename = filename + ".png";
             } else if (blob.type == "image/jpg") {
               filename = filename + ".jpg";
             }
             client
-              .put(filename, blob)
+              .uploadFile(filename, blob)
               .then(function (res: any) {
                 console.log(`upload file: ${res}`);
                 setUserInput(userInput + "\n" + `![](${res.url})`);
