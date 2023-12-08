@@ -719,25 +719,27 @@ function _Chat() {
   };
 
   const handleDragOver = (event: any) => {
-    event.preventDefault();
+    // event.preventDefault();
     setDragging(true);
   };
 
   const handleDragEnter = (event: any) => {
-    event.preventDefault();
+    // event.preventDefault();
     setDragging(true);
   };
 
   const handleDragLeave = (event: any) => {
-    event.preventDefault();
+    // event.preventDefault();
     setDragging(false);
   };
 
   const handleDrop = (event: any) => {
-    event.preventDefault();
+    // event.preventDefault();
     setDragging(false);
     const file = event.dataTransfer.files[0];
-    handleFileUpload(file);
+    if (file != null) {
+      handleFileUpload(file);
+    }
   };
 
   const handleFileChange = (event: any) => {
@@ -772,8 +774,8 @@ function _Chat() {
     if (client == null) {
       return;
     }
-    // 阻止默认行为
-    event.preventDefault();
+    // // 阻止默认行为
+    // event.preventDefault();
 
     // 寻找粘贴的图像
     if (event.clipboardData && event.clipboardData.items) {
