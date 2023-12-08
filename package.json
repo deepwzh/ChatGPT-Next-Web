@@ -22,6 +22,7 @@
     "@vercel/analytics": "^0.1.11",
     "ali-oss": "^6.18.1",
     "ast-types": "^0.14.2",
+    "aws-sdk": "^2.1514.0",
     "clipboardy": "^4.0.0",
     "emoji-picker-react": "^4.5.15",
     "fuse.js": "^6.6.2",

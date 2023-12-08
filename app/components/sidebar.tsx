@@ -30,6 +30,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { isIOS, useMobileScreen } from "../utils";
 import dynamic from "next/dynamic";
 import { showConfirm, showToast } from "./ui-lib";
+import { getClientConfig } from "@/app/config/client";
 
 const ChatList = dynamic(async () => (await import("./chat-list")).ChatList, {
   loading: () => null,
@@ -155,10 +156,10 @@ export function SideBar(props: { className?: string }) {
     >
       <div className={styles["sidebar-header"]} data-tauri-drag-region>
         <div className={styles["sidebar-title"]} data-tauri-drag-region>
-          ChatGPT Next
+          {getClientConfig()?.displayTitle || "ChatGPT Next"}
         </div>
         <div className={styles["sidebar-sub-title"]}>
-          Build your own AI assistant.
+          {getClientConfig()?.displayDesc || "Your personal ChatGPT Chat Bot."}
         </div>
         <div className={styles["sidebar-logo"] + " no-dark"}>
           <ChatGptIcon />

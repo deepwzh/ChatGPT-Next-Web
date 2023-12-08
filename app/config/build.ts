@@ -33,11 +33,16 @@ export const getBuildConfig = () => {
     }
   })();
 
+  const displayTitle = process.env.DISPLAY_TITLE;
+  const displayDesc = process.env.DISPLAY_DESC;
+
   return {
     version,
     ...commitInfo,
     buildMode,
     isApp,
+    displayTitle,
+    displayDesc,
   };
 };
 

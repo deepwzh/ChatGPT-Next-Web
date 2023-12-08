@@ -3,11 +3,14 @@ import "./styles/globals.scss";
 import "./styles/markdown.scss";
 import "./styles/highlight.scss";
 import { getClientConfig } from "./config/client";
+import { getServerSideConfig } from "./config/server";
 import { type Metadata } from "next";
 
+const serverConfig = getServerSideConfig();
+
 export const metadata: Metadata = {
-  title: "ChatGPT Next Web",
-  description: "Your personal ChatGPT Chat Bot.",
+  title: serverConfig.display_title || "ChatGPT Next Web",
+  description: serverConfig.display_desc || "Your personal ChatGPT Chat Bot.",
   viewport: {
     width: "device-width",
     initialScale: 1,

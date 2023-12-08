@@ -27,6 +27,10 @@ declare global {
       NEXT_PUBLIC_OSS_ACCESS_KEY_ID?: string; // access_key_id
       NEXT_PUBLIC_OSS_ACCESS_KEY_SECRET?: string; // access_key_secret
       NEXT_PUBLIC_OSS_BUCKET_NAME?: string; // 对象存储桶名字
+
+      DISPLAY_TITLE?: string; // 显示的标题
+      DISPLAY_DESC?: string; // 显示的描述
+
       // azure only
       AZURE_URL?: string; // https://{azure-url}/openai/deployments/{deploy-name}
       AZURE_API_KEY?: string;
@@ -105,5 +109,8 @@ export const getServerSideConfig = () => {
     oss_access_key_id: process.env.NEXT_PUBLIC_OSS_ACCESS_KEY_ID,
     oss_access_key_secret: process.env.NEXT_PUBLIC_OSS_ACCESS_KEY_SECRET,
     oss_bucket_name: process.env.NEXT_PUBLIC_OSS_BUCKET_NAME,
+
+    display_title: process.env.DISPLAY_TITLE,
+    display_desc: process.env.DISPLAY_DESC,
   };
 };
