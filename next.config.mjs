@@ -31,7 +31,7 @@ const nextConfig = {
     unoptimized: mode === "export",
   },
   experimental: {
-    forceSwcTransforms: true,
+    // forceSwcTransforms: true,
   },
 };
 

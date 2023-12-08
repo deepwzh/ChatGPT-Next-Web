@@ -22,6 +22,11 @@ declare global {
       DISABLE_FAST_LINK?: string; // disallow parse settings from url or not
       CUSTOM_MODELS?: string; // to control custom models
 
+      NEXT_PUBLIC_OSS_HOST?: string; // 对象存储地址
+      NEXT_PUBLIC_OSS_REGION?: string; // 对象存储区域
+      NEXT_PUBLIC_OSS_ACCESS_KEY_ID?: string; // access_key_id
+      NEXT_PUBLIC_OSS_ACCESS_KEY_SECRET?: string; // access_key_secret
+      NEXT_PUBLIC_OSS_BUCKET_NAME?: string; // 对象存储桶名字
       // azure only
       AZURE_URL?: string; // https://{azure-url}/openai/deployments/{deploy-name}
       AZURE_API_KEY?: string;
@@ -70,6 +75,8 @@ export const getServerSideConfig = () => {
     `[Server Config] using ${randomIndex + 1} of ${apiKeys.length} api key`,
   );
 
+  console.log("region", process.env.OSS_REGION);
+
   return {
     baseUrl: process.env.BASE_URL,
     apiKey,
@@ -92,5 +99,11 @@ export const getServerSideConfig = () => {
     hideBalanceQuery: !process.env.ENABLE_BALANCE_QUERY,
     disableFastLink: !!process.env.DISABLE_FAST_LINK,
     customModels,
+
+    oss_host: process.env.NEXT_PUBLIC_OSS_HOST,
+    oss_region: process.env.NEXT_PUBLIC_OSS_REGION,
+    oss_access_key_id: process.env.NEXT_PUBLIC_OSS_ACCESS_KEY_ID,
+    oss_access_key_secret: process.env.NEXT_PUBLIC_OSS_ACCESS_KEY_SECRET,
+    oss_bucket_name: process.env.NEXT_PUBLIC_OSS_BUCKET_NAME,
   };
 };

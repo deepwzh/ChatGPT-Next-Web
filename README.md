@@ -1,3 +1,4 @@
+    "cos-nodejs-sdk-v5": "^2.12.6",
 <div align="center">
 <img src="./docs/images/icon.svg" alt="icon"/>
 

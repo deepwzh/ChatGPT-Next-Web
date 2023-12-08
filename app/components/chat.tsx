@@ -89,6 +89,8 @@ import { prettyObject } from "../utils/format";
 import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
+import { getOSSClient } from "../utils/oss";
+const client = getOSSClient();
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
@@ -744,18 +746,63 @@ function _Chat() {
   };
 
   const handleFileUpload = async (file: any) => {
+    if (client == null) {
+      return;
+    }
     // 在这里处理上传文件的逻辑，例如读取文件内容或上传到服务器
     const reader = new FileReader();
     reader.onload = () => {
-      const imageDataUrl = reader.result;
-      if (imageDataUrl != null && typeof imageDataUrl == "string") {
-        setUserInput(userInput + "\n" + `![](${imageDataUrl})`);
-        // setUploadedImage(imageDataUrl);
-      }
+      const imageData = reader.result;
+      let filename = `pasted-image-${Date.now()}-${file.name}`;
+
+      client
+        .put(filename, file)
+        .then(function (res: any) {
+          console.log(`upload file: ${res}`);
+          setUserInput(userInput + "\n" + `![](${res.url})`);
+        })
+        .catch(function (e: any) {
+          console.error(e);
+        });
     };
-    reader.readAsDataURL(file);
+    reader.readAsBinaryString(file);
   };
 
+  const handlePaste = (event: any) => {
+    if (client == null) {
+      return;
+    }
+    // 阻止默认行为
+    event.preventDefault();
+
+    // 寻找粘贴的图像
+    if (event.clipboardData && event.clipboardData.items) {
+      const items = event.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        // 检测是否为图片
+        if (items[i].type.indexOf("image") !== -1) {
+          const blob = items[i].getAsFile();
+          if (blob != null) {
+            let filename = `pasted-image-${Date.now()}`;
+            if (blob.type == "image/png") {
+              filename = filename + ".png";
+            } else if (blob.type == "image/jpg") {
+              filename = filename + ".jpg";
+            }
+            client
+              .put(filename, blob)
+              .then(function (res: any) {
+                console.log(`upload file: ${res}`);
+                setUserInput(userInput + "\n" + `![](${res.url})`);
+              })
+              .catch(function (e: any) {
+                console.error(e);
+              });
+          }
+        }
+      }
+    }
+  };
   const onPromptSelect = (prompt: RenderPompt) => {
     setTimeout(() => {
       setPromptHints([]);
@@ -1340,11 +1387,12 @@ function _Chat() {
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onPaste={handlePaste}
             style={{
               fontSize: config.fontSize,
             }}
           />
-          <input type="file" onChange={handleFileChange} accept="image/*" />
+          {/* <input type="file" onChange={handleFileChange} accept="image/*" /> */}
           <IconButton
             icon={<SendWhiteIcon />}
             text={Locale.Chat.Send}

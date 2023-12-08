@@ -66,9 +66,6 @@ export class ChatGPTApi implements LLMApi {
     return res.choices?.at(0)?.message?.content ?? "";
   }
   getContent(content: string) {
-    // ![山景图片](https://example.com/images/mountain.jpg)
-    // ![山景图片](https://example.com/images/mountain.jpg)
-    // ![山景图片](https://example.com/images/mountain.jpg)
     const regex = /!\[.*?\]\(([^)]+)\)/g;
     // const matches = content.match(regex);
     // if (matches == null || matches.length <= 0) {
@@ -122,11 +119,6 @@ export class ChatGPTApi implements LLMApi {
     return content;
   }
   async chat(options: ChatOptions) {
-    const messages = options.messages.map((v) => ({
-      role: v.role,
-      content: this.getContent(v.content),
-    }));
-
     const modelConfig = {
       ...useAppConfig.getState().modelConfig,
       ...useChatStore.getState().currentSession().mask.modelConfig,
@@ -134,6 +126,14 @@ export class ChatGPTApi implements LLMApi {
         model: options.config.model,
       },
     };
+
+    const messages = options.messages.map((v) => ({
+      role: v.role,
+      content:
+        modelConfig.model == "gpt-4-vision-preview"
+          ? this.getContent(v.content)
+          : v.content,
+    }));
 
     const requestPayload = {
       messages,
@@ -143,7 +143,7 @@ export class ChatGPTApi implements LLMApi {
       presence_penalty: modelConfig.presence_penalty,
       frequency_penalty: modelConfig.frequency_penalty,
       top_p: modelConfig.top_p,
-      max_tokens: 4096,
+      max_tokens: modelConfig.model == "gpt-4-vision-preview" ? 4096 : null,
       // max_tokens: Math.max(modelConfig.max_tokens, 1024),
       // Please do not ask me why not send max_tokens, no reason, this param is just shit, I dont want to explain anymore.
     };
